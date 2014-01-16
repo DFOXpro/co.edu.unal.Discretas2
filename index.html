@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Cifrado asimetrico</title>
+        <link type="text/css" rel="stylesheet" href="recursos/css/bootstrap.css">
+        <link type="text/css" rel="stylesheet" href="recursos/css/Ingesoft2.css">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <style>
+            article{
+                overflow-x: auto;
+            }
+            article span{
+                display: block;
+            }
+            table, th, td{
+                border: 1px solid white;
+                text-align: center;
+            }
+            article table, article p, article input{
+                width: 100%;
+                margin-top: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <button class="izquierda glyphicon glyphicon-align-justify" id="btn-opciones"><span>Menú</span></button>
+            <span>Cifrado asimetrico</span>
+        </header>
+
+        <article>
+            <b>Escoje los primos que se usarán para el cifrado</b>
+            <input type="number" id="p" placeholder="P">
+            <input type="number" id="q" placeholder="Q">
+        </article>
+
+        <footer>
+            <div class="izquierda">
+                <input type="checkbox" id="cb">
+                <label for="cb">Automatico?</label>
+                <input id="delay" type="number" placeholder="3 segundos">
+            </div>
+            <button id="btn-cifrar" class="derecha glyphicon glyphicon-flash"><span>Cifrar</span></button>
+        </footer>
+
+        <aside>
+            <ul>
+                <li id="li-principal" class="seleccionado"><a href="#"><span class="glyphicon glyphicon-certificate"></span> Cifrar</a></li>
+<!--                <li id="li-preferencias"><a href="#"><span class="glyphicon glyphicon-cog"></span> Preferencias</a></li>-->
+                <li id="li-teoria"><a href="#"><span class="glyphicon glyphicon-book"></span> Teoria</a></li>
+<!--                <li id="li-acerca"><a href="#"><span class="glyphicon glyphicon-question-sign"></span> Acerca de esta app</a></li>-->
+            </ul>
+        </aside>
+        <script src="recursos/utiles.js" type="text/javascript"></script>
+        <script src="recursos/BigInteger.js" type="text/javascript"></script>
+        <script src="recursos/jquery/jquery.js" type="text/javascript"></script>
+        <script src="recursos/bootstrap/bootstrap.js" type="text/javascript"></script>
+        <script src="recursos/Vista.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            //var Vista = new Object();
+            var Control = new Object();
+
+            Control.a = new Array();//input
+            Control.r = new Array();//output
+            Control.p = 17;//19
+            Control.q = 19;//13
+            Control.phi = 0;//Calc
+            Control.llavec = 11;//1<this<phi & 1=gcd(phi,this)
+            Control.llaved = 1;//1<this<phi & cd= 1 mod phi
+            Control.mod = 0;//p*q
+
+            Control.delay = 0;
+            Control.cifrado = new Array();
+            Control.texto = "";
+            
+            /**
+             * Algoritmo extendido de euclides
+             * @param {number} a primo
+             * @param {number} b primo
+             * @returns {Array}
+             */
+            Math.eea = function(a,b){
+                var quot, a1=1, b1=0, a2=0, b2=1, aneg=1, bneg=1, result = new Array;
+                if(a < 0) a = -a; aneg=-1;
+                if(b < 0) b = -b; bneg=-1;
+                if(b > a) {
+                    var temp = a;
+                    a = b;
+                    b = temp;
+                }
+                while (true) {
+                   quot = -Math.floor(a / b);
+                   a %= b;
+                   a1 += quot*a2; b1 += quot*b2;
+                   if(a == 0) {result[0]=b*bneg; result[1]=a2; result[2]=b2; return result;};
+                   quot = -Math.floor(b / a);
+                   b %= a;
+                   a2 += quot*a1; b2 += quot*b1;
+                  if(b == 0) {result[0]=a*aneg; result[1]=a1; result[2]=b1; return result;};
+                };
+                return result;
+            }
+
+//Control
+            Control.generar = function (){
+                Control.mod = Control.p*Control.q;
+                Control.phi = (Control.p-1)*(Control.q-1);//253
+                //Control.llavec = 3;//1<this<phi & 1=gcd(phi,this)
+                {//escoje el menor eea para decrif
+                    var temp = Math.eea(Control.llavec,Control.phi);
+                    for(var i = 0; i < temp.length;i++)
+                        if(temp[i] > 0)
+                            if(Control.llaved == 1 | Control.llaved > temp[i]) Control.llaved = temp[i];
+                }
+            };
+            Control.cifrar = function (t){
+                Control.texto = t;
+                if(!isNaN(parseFloat($("#delay").val()))) Control.delay = $("#delay").val()*1000;
+                else Control.delay = 3000;
+                Control.cifrado[0] = "";
+                for(var i = 0; i < t.length; i++){
+                    Control.a[i] = t.charCodeAt(i);
+                    var tempo = bigInt(Control.a[i]).pow(Control.llavec);
+                    Control.cifrado[i+1] = tempo.mod(Control.mod);
+                    Control.cifrado[0] += ""+Control.cifrado[i+1].toString();
+                }
+                Control.decifrar();
+                Vista.generar();
+
+            };
+            Control.decifrar = function (){
+                
+                for(var k = 0; k < Control.cifrado.length; k++){
+                    var tempod = bigInt(Control.cifrado[k+1]).pow(Control.llaved);
+                    Control.r[k] = tempod.mod(Control.mod);
+                }
+                console.log("debug");
+
+            };
+//Vista            
+            Vista.generar = function (){
+                $("#div-code").html($("#txt-generar").html().format(Control.p,Control.q));
+                var reloj= 1;
+                setTimeout(function (){
+                    $("ol").append($("#txt-generar-1").html().format(Control.mod));
+                }, Control.delay*reloj++);
+                setTimeout(function (){
+                    $("ol").append($("#txt-generar-2").html().format(Control.phi));
+                }, Control.delay*reloj++);
+                setTimeout(function (){
+                    $("ol").append($("#txt-generar-3").html().format(Control.llavec));
+                }, Control.delay*reloj++);
+                setTimeout(function (){
+                    $("ol").append($("#txt-generar-4").html().format(Control.llaved));
+                }, Control.delay*reloj++);
+                
+                setTimeout(Vista.llenarLetras, Control.delay*reloj++);
+                setTimeout(Vista.llenarCharCodes, Control.delay*reloj++);
+                setTimeout(Vista.llenarp, Control.delay*reloj++);
+                setTimeout(Vista.llenarpmod, Control.delay*reloj++);
+                setTimeout(Vista.cifrado, Control.delay*reloj++);
+                setTimeout(Vista.llenarCifrado, Control.delay*reloj++);
+                setTimeout(Vista.llenarc, Control.delay*reloj++);
+                setTimeout(Vista.llenarcmod, Control.delay*reloj++);
+                setTimeout(Vista.llenarResultado, Control.delay*reloj++);
+            };
+            Vista.llenarLetras = function (){
+                $("#div-code").append($("#txt-0").html().format("",$("#txt-1").html()));
+                $("#div-code").append($("#code-tabla").html().format(Control.llavec,Control.mod));//Limpia la tabla
+                var j=0;
+                setInterval(function (){
+                    if(j < Control.texto.length){
+                        $("table").append($("#code-tabla-linea").html().format(Control.texto[j],"","","",""));
+                        j++;
+                    }
+                },300);
+            };
+            Vista.llenarCharCodes = function (){
+                $("ol")[1].innerHTML += $("#txt-2").html();
+                var j=0;
+                setInterval(function (){
+                    if(j < Control.a.length){
+                        $("td")[(j*4)+1].innerHTML= Control.a[j];
+                        j++;
+                    }
+                },300);
+            };
+            Vista.llenarp = function (){
+                $("ol")[1].innerHTML += $("#txt-3").html();
+                var j=0;
+                setInterval(function (){
+                    if(j < Control.a.length){
+                        var te = bigInt(Control.a[j]).pow(Control.llavec);
+                        $("td")[(j*4)+2].innerHTML= te.toString();
+                        j++;
+                    }
+                },300);
+            };
+            Vista.llenarpmod = function (){
+                $("ol")[1].innerHTML += $("#txt-4").html().format(Control.mod);
+                var j=0;
+                setInterval(function (){
+                    if(j < Control.a.length){
+                        $("td")[(j*4)+3].innerHTML= Control.cifrado[j+1];
+                        j++;
+                    }
+                },300);
+            };
+            Vista.cifrado = function (){
+                $("#div-code").append($("#code-cifrado").html().format(Control.cifrado[0]));
+            };
+
+//Descifrado
+            Vista.llenarCifrado = function (){
+                var t = Control.cifrado;
+                $("#div-code").append(
+                    $("#txt-0").html().format("de",$("#txt-5").html().format(Control.mod))
+                );
+                $("#div-code").append($("#code-tabla2").html().format(Control.llaved,Control.mod));
+                var j=1;
+                setInterval(function (){
+                    if(j < t.length){
+                        $("#t2").append($("#code-tabla-linea").html().format(t[j],"","","",""));
+                        $('article').animate({
+                            scrollTop: $("#t2").offset().top
+                        }, 200);
+                //});
+                        j++;
+                    }
+                },300);
+            };
+            Vista.llenarc = function (){
+                var t = Control.cifrado;
+                $("ol")[2].innerHTML +=
+                    $("#txt-6").html().format(Control.llaved);
+                var j=1;
+                setInterval(function (){
+                    var te = bigInt(Control.cifrado[j]).pow(Control.llaved);
+                    if(j < Control.cifrado.length){
+                        $("td")[(j*4)+(Control.a.length*4)-3].innerHTML= te.toString();
+                        j++;
+                    }
+                },300);
+            };
+            Vista.llenarcmod = function (){
+                var t = Control.cifrado;
+                $("ol")[2].innerHTML +=
+                    $("#txt-7").html().format(Control.mod);
+                var j=1;
+                setInterval(function (){
+                    if(j < Control.cifrado.length){
+                        $("td")[(j*4)+(Control.a.length*4)-2].innerHTML= Control.r[j-1];
+                        j++;
+                    }
+                },300);
+            };
+            Vista.llenarResultado = function (){
+                var t = Control.cifrado;
+                $("ol")[2].innerHTML +=
+                    $("#txt-7").html();
+                var j=1;
+                setInterval(function (){
+                    if(j < Control.cifrado.length){
+                        $("td")[(j*4)+(Control.a.length*4)-1].innerHTML= 
+                            String.fromCharCode(Control.r[j-1]);
+                        j++;
+                    }
+                },300);
+            };
+//MAIN... EVENTOS
+            $("document").ready(function (){
+                $("article").html($("#principal").html());
+                $('#btn-opciones').click(Vista.alternarAside);
+                $('ul > li').click(function (){
+                    Vista.seleccionarAside($(this));
+                });
+                $("#btn-cifrar").click(function (){
+                    Control.generar();
+                    var t = $("#inpt").val();
+                    //if(!isNaN(parseInt($("#p").val()))) Control.p = parseInt($("#p").val());
+                    //if(!isNaN(parseInt($("#q").val()))) Control.q = parseInt($("#q").val());
+                    if(t == "" ){
+                        $("#spn-txt").html($("#txt-err-vacio").html());
+                        $("#div-code").html("");
+                    } else Control.cifrar(t);
+                });
+                $("#li-principal").click(function (){
+                    $("article").html($("#principal").html());
+                });
+                $("#li-teoria").click(function (){
+                    $("article").html($("#teoria").html());
+                });
+            });
+        </script>
+        <script type="text/template" id="txt-err-vacio">
+            <b>Escribe un texto para cifrar.</b>
+        </script>
+        <script type="text/template" id="txt-generar">
+            <p>Teniendo los primos <math>p={0}, q={1}</math> se generaran las llaves de cifrado y decifrado.<br>
+            Para esto tambien es necesario hallár un modulo.
+                <ol></ol>
+            <p>
+        </script><script type="text/template" id="acerca">
+            
+        </script><script type="text/template" id="principal">
+            <input id="inpt" type="text" placeholder="Texto a cifrar">
+            <div id="spn-txt">
+            </div>
+            <div id="div-code">
+            </div>
+        </script><script type="text/template" id="txt-generar-1">
+            <li>El modulo lo hallamos simplemente multiplicando los primos: <math>m=pq={0}</math></li>
+        </script><script type="text/template" id="txt-generar-2">
+            <li>Se define fi(φ) como: <math>φ=(p-1)(q-1)={0}</math></li>
+        </script><script type="text/template" id="txt-generar-3">
+            <li>Se escoje un primo para la llave de crifrado tal que: <math>1 &lt c &lt φ, c primo relativo a φ; c={0}</math></li>
+        </script><script type="text/template" id="txt-generar-4">
+            <li>finalmente se calcula la llave de decrifrado tal que: <math>1 &lt d &lt φ, d primo relativo a φ, cd ≡ 1 mod φ; d={0}</math></li>
+        </script>
+        <script type="text/template" id="txt-0">
+            <p><b>Proceso de {0}cifrado</b>
+                <ol>{1}</ol>
+            </p>
+        </script><script type="text/template" id="txt-1">
+            <li>Separamos el texto caracter por caracter</li>
+        </script><script type="text/template" id="txt-2">
+            <li>Pasamos el caracter a cifrar a codigo numerico</li>
+        </script><script type="text/template" id="txt-3">
+            <li>Elevamos a la 3 cada codigo numerico</li>
+        </script><script type="text/template" id="txt-4">
+            <li>Finalmente aplicamos el modulo {0}</li>
+        </script><script type="text/template" id="txt-5">
+            <li>Desglosamos el texto cifrado cada numero menor a {0}</li>
+        </script><script type="text/template" id="txt-6">
+            <li>Acontinuación elevamos cada numero a la {0}</li>
+        </script><script type="text/template" id="txt-7">
+            <li>Aplicamos el modulo {0}</li>
+        </script><script type="text/template" id="txt-8">
+            <li>Convertimos los numeros resultantes a caracteres</li>
+        </script>
+        <script type="text/template" id="code-cifrado">
+            <p>Ahora teniendo el texto cifrado:<br><b>{0}</b><br>
+            podemos compartir este texto para posterior descifrado</p>
+        </script>
+        <script type="text/template" id="code-tabla">
+            <table>
+                <tr>
+                    <th>Letra</th>
+                    <th>Codigo numerico</th>
+                    <th>p<sup>{0}</sup></th>
+                    <th>p<sup>{0}</sup>mod({1})</th>
+                </tr>
+            </table>
+        </script>
+        <script type="text/template" id="code-tabla2">
+            <table id="t2">
+                <tr>
+                    <th>Cifrado</th>
+                    <th>c<sup>{0}</sup></th>
+                    <th>c<sup>{0}</sup>mod({1})</th>
+                    <th>Letra resultante</th>
+                </tr>
+            </table>
+        </script>
+        <script type="text/template" id="code-tabla-linea">
+            <tr>
+                <td>{0}</td>
+                <td>{1}</td>
+                <td>{2}</th>
+                <td>{3}</td>
+            </tr>
+        </script>
+<!--        Carga el template de teoria-->
+        <script type="text/template" id="teoria">
+        <h1>Marco Teórico</h1>
+        <h2>Criptosistemas de clave pública</h2>
+        <p>Los criptosistemas de clave pública (también llamados criptosistemas asimétricos) se caracterizan por utilizar claves distintas para el cifrado y descifrado de la información. Su principal ventaja es que facilitan el proceso de distribución e intercambio de claves entre los participantes de la comunicación segura, que era un problema importante de los criptosistemas simétricos o de clave privada.</p>
+        <p>Los algoritmos asimétricos emplean generalmente longitudes de clave mucho mayores que los simétricos, que usan una única clave secreta. Por ejemplo, mientras que para algoritmos simétricos se considera segura una clave de 128 bits, para la mayoría de algoritmos asimétricos (incluido el del RSA), se recomiendan actualmente claves de al menos 1024 bits de longitud. Además, la complejidad de cálculo que comportan los algoritmos de los criptosistemas asimétricos los hace considerablemente más lentos que los algoritmos de cifrado simétricos. Por eso en la práctica los métodos asimétricos se emplean principalmente para codificar la clave de sesión (simétrica) de cada comunicación o transacción particular.</p>
+        <p>La criptografía basada en criptosistemas de clave pública es relativamente reciente, pues los primeros algoritmos asimétricos aparecen después de 1975. El criptosistema de esta clase más importante y extendido hoy en dia es el RSA, que utiliza la exponenciación modular para cifrar y descifrar y basa su seguridad en la complejidad del problema de la factorización de enteros grandes.</p>
+        <h2>El criptosistema RSA</h2>
+        <p>De entre todos los algoritmos asimétricos, RSA es el más usado y también quizás el más sencillo de entender e implementar. Una peculiaridad de este algoritmo es que sus dos claves sirven indistintamente tanto para cifrar como para autenticar. Debe su nombre a sus tres inventores: Ronald Rivest, Adi Shamir y Leonard Adleman, que publicaron por primera vez el método RSA en 1977. Ha estado bajo patente de los Laboratorios RSA hasta el 20 de septiembre de 2000, por lo que su uso comercial estuvo restringido hasta esa fecha.</p>
+        <p>RSA se basa en la dificultad que presenta la factorización de números grandes. Las claves pública y privada se calculan a partir de un número que se obtiene como producto de dos primos grandes. Un atacante que quiera recuperar un texto claro a partir del criptograma y de la clave pública, tiene que enfrentarse a dicho problema de factorización.</p>
+        <h2>El problema de la factorización de números grandes</h2>
+        <p>Una forma posible de descomponer un número n en sus factores es probar a dividirlo por todos los números enteros positivos comprendidos entre 2 y la raíz de n. Pero cuando hablamos de un número de tamaño 1024 bits, este método es computacionalmente impracticable. Por supuesto, a lo largo del tiempo los matemáticos han inventado otros métodos de factorización más eficientes, pero ninguno ha conseguido un algoritmo con un orden de complejidad que permita factorizar en un tiempo razonable números de tamaños grandes como los empleados en RSA actualmente, aun con la potencia computacional disponible hoy en día.</p>
+        <p>De hecho el problema de la factorización de enteros se considera que es un problema de clase NP, es decir, un problema para el que existe uno o más algoritmos que lo resuelven, pero ninguno de los algoritmos conocidos se ejecutan en un tiempo polinomial (que pueda ser expresado polinómicamente en función del tamaño de los datos de entrada), y por lo tanto son ineficientes o intratables para datos de entrada muy grandes.</p>
+        <h2>El algoritmo RSA</h2>
+        <ol><li>Generación del par de claves</li>
+            <p>Para generar un par de claves (KP ; Kp), en primer lugar se eligen aleatoriamente dos números primos grandes, p y q (de unas 200 cifras cada uno, por ejemplo). Después se calcula el producto n = p.q</p>
+            <p>Escogeremos ahora un número e primo relativo con (p-1) y con (q-1). Este par de números (e,n) pueden ser conocidos por cualquiera, y constituyen la llamada clave pública.</p>
+            <p>e por tanto debe tener un inverso módulo (p-1)(q-1), al que llamamos d. Por supuesto se cumple que ed ≡ 1 mod((p-1)(q-1)), que es lo mismo que decir que ed = 1+k (p-1)(q-1) para algún entero k. La clave privada será el par (d,n). Este número d debe mantenerse secreto y sólo será conocido por el propietario del par de claves.</p>
+            <li>Cifrado del mensaje con la clave pública</li>
+            <p>Hay que hacer notar que con este algoritmo los mensajes que se cifran y descifran son números enteros de tamaño menor que n.</p>
+            <p>Para obtener el mensaje cifrado C a partir del mensaje en claro M, se realiza la siguiente operación:<br>
+                C= M<sup>e</sup> (mod n)
+            </p>
+            <li>Descifrado del mensaje con la clave privada</li>
+            <p>Para recuperar el mensaje original a partir del cifrado se realiza la siguiente operación:<br>
+                M= C<sup>d</sup> (mod n)</p>
+        </ol>
+        <h2>Justificación del método</h2>
+        <p>C<sup>d</sup> (mod n)= (M<sup>e</sup>)<sup>d</sup> (mod n) = M<sup>1+k(p-1)(q-1)</sup>(mod n) = (M<sup>(p-1)(q-1)</sup>)k.M (mod n) [i]</p>
+        <p>Si recordamos, la función de Euler φ(n)= (p-1)(q-1), y que en general, salvo azar improbable, se tendrá que mcd(M,p)=mcd(M,q)=mcd(M,n)=1. Y por tanto según el teorema de Euler-Fermat, </p>
+        <p>M<sup>φ</sup>(n) ≡ 1 (mod n) ⇒ (M<sup>(p-1)(q-1)</sup>)k ≡ 1 (mod n) [ii]</p>
+        <p>De [i] y [ii] se obtiene que C<sup>d</sup> (mod n) = 1.M (mod n) = M, para 0 < M < n</p>
+        <h3>Conmutatividad del cifrado y descifrado en RSA</h3>
+        <p>Por las propiedades de la exponenciación modular, el cifrado y descifrado son conmutativos:</p>
+        <p>M = (M<sup>e</sup> mod n)d mod n = M<sup>d·e</sup> mod n = (M<sup>d</sup> mod n)<sup>e</sup> mod n = M</p>
+        <p>Esto supone que si cifrando M con la clave pública e y a continuación descifrando el resultado con la privada d obtenemos de nuevo M, también podemos cifrar M con la clave privada d y descifrar el resultado con la clave pública e, volviendo a obtener M.</p>
+        <p>Esta propiedad es importante porque nos permite utilizar RSA no sólo para cifrar un mensaje, sino también para autenticar el mensaje.</p>
+        </script>
+    </body>
+</html>

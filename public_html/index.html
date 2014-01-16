@@ -35,11 +35,9 @@ and open the template in the editor.
         </header>
 
         <article>
-            <input id="inpt" type="text" placeholder="Texto a cifrar">
-            <div id="spn-txt">
-            </div>
-            <div id="div-code">
-            </div>
+            <b>Escoje los primos que se usarán para el cifrado</b>
+            <input type="number" id="p" placeholder="P">
+            <input type="number" id="q" placeholder="Q">
         </article>
 
         <footer>
@@ -53,6 +51,7 @@ and open the template in the editor.
 
         <aside>
             <ul>
+                <li id="li-principal"><a href="#"><span class="glyphicon glyphicon-certificate"></span> Cifrar</a></li>
                 <li id="li-preferencias"><a href="#"><span class="glyphicon glyphicon-cog"></span> Preferencias</a></li>
                 <li id="li-teoria"><a href="#"><span class="glyphicon glyphicon-book"></span> Teoria</a></li>
                 <li id="li-acerca"><a href="#"><span class="glyphicon glyphicon-question-sign"></span> Acerca de esta app</a></li>
@@ -273,17 +272,26 @@ and open the template in the editor.
                     }
                 },300);
             };
-            
-            
 //MAIN
             $("document").ready(function (){
+                $("article").html($("#principal").html());
                 $("#btn-cifrar").click(function (){
                     Control.generar();
                     var t = $("#inpt").val();
+                    var p = $("#p").val();
+                    var q = $("#q").val();
+                    if(p != "" ) Control.p = parseInt(p);
+                    if(q != "" ) Control.q = parseInt(q);
                     if(t == "" ){
                         $("#spn-txt").html($("#txt-err-vacio").html());
                         $("#div-code").html("");
                     } else Control.cifrar(t);
+                });
+                $("#li-principal").click(function (){
+                    $("article").html($("#principal").html());
+                });
+                $("#li-teoria").click(function (){
+                    $("article").html($("#teoria").html());
                 });
             });
         </script>
@@ -295,6 +303,14 @@ and open the template in the editor.
             Para esto tambien es necesario hallár un modulo.
                 <ol></ol>
             <p>
+        </script><script type="text/template" id="acerca">
+            
+        </script><script type="text/template" id="principal">
+            <input id="inpt" type="text" placeholder="Texto a cifrar">
+            <div id="spn-txt">
+            </div>
+            <div id="div-code">
+            </div>
         </script><script type="text/template" id="txt-generar-1">
             <li>El modulo lo hallamos simplemente multiplicando los primos: <math>m=pq={0}</math></li>
         </script><script type="text/template" id="txt-generar-2">
@@ -354,6 +370,44 @@ and open the template in the editor.
                 <td>{2}</th>
                 <td>{3}</td>
             </tr>
+        </script>
+<!--        Carga el template de teoria-->
+        <script type="text/template" id="teoria">
+        <h1>Marco Teórico</h1>
+        <h2>Criptosistemas de clave pública</h2>
+        <p>Los criptosistemas de clave pública (también llamados criptosistemas asimétricos) se caracterizan por utilizar claves distintas para el cifrado y descifrado de la información. Su principal ventaja es que facilitan el proceso de distribución e intercambio de claves entre los participantes de la comunicación segura, que era un problema importante de los criptosistemas simétricos o de clave privada.</p>
+        <p>Los algoritmos asimétricos emplean generalmente longitudes de clave mucho mayores que los simétricos, que usan una única clave secreta. Por ejemplo, mientras que para algoritmos simétricos se considera segura una clave de 128 bits, para la mayoría de algoritmos asimétricos (incluido el del RSA), se recomiendan actualmente claves de al menos 1024 bits de longitud. Además, la complejidad de cálculo que comportan los algoritmos de los criptosistemas asimétricos los hace considerablemente más lentos que los algoritmos de cifrado simétricos. Por eso en la práctica los métodos asimétricos se emplean principalmente para codificar la clave de sesión (simétrica) de cada comunicación o transacción particular.</p>
+        <p>La criptografía basada en criptosistemas de clave pública es relativamente reciente, pues los primeros algoritmos asimétricos aparecen después de 1975. El criptosistema de esta clase más importante y extendido hoy en dia es el RSA, que utiliza la exponenciación modular para cifrar y descifrar y basa su seguridad en la complejidad del problema de la factorización de enteros grandes.</p>
+        <h2>El criptosistema RSA</h2>
+        <p>De entre todos los algoritmos asimétricos, RSA es el más usado y también quizás el más sencillo de entender e implementar. Una peculiaridad de este algoritmo es que sus dos claves sirven indistintamente tanto para cifrar como para autenticar. Debe su nombre a sus tres inventores: Ronald Rivest, Adi Shamir y Leonard Adleman, que publicaron por primera vez el método RSA en 1977. Ha estado bajo patente de los Laboratorios RSA hasta el 20 de septiembre de 2000, por lo que su uso comercial estuvo restringido hasta esa fecha.</p>
+        <p>RSA se basa en la dificultad que presenta la factorización de números grandes. Las claves pública y privada se calculan a partir de un número que se obtiene como producto de dos primos grandes. Un atacante que quiera recuperar un texto claro a partir del criptograma y de la clave pública, tiene que enfrentarse a dicho problema de factorización.</p>
+        <h2>El problema de la factorización de números grandes</h2>
+        <p>Una forma posible de descomponer un número n en sus factores es probar a dividirlo por todos los números enteros positivos comprendidos entre 2 y la raíz de n. Pero cuando hablamos de un número de tamaño 1024 bits, este método es computacionalmente impracticable. Por supuesto, a lo largo del tiempo los matemáticos han inventado otros métodos de factorización más eficientes, pero ninguno ha conseguido un algoritmo con un orden de complejidad que permita factorizar en un tiempo razonable números de tamaños grandes como los empleados en RSA actualmente, aun con la potencia computacional disponible hoy en día.</p>
+        <p>De hecho el problema de la factorización de enteros se considera que es un problema de clase NP, es decir, un problema para el que existe uno o más algoritmos que lo resuelven, pero ninguno de los algoritmos conocidos se ejecutan en un tiempo polinomial (que pueda ser expresado polinómicamente en función del tamaño de los datos de entrada), y por lo tanto son ineficientes o intratables para datos de entrada muy grandes.</p>
+        <h2>El algoritmo RSA</h2>
+        <ol><li>Generación del par de claves</li>
+            <p>Para generar un par de claves (KP ; Kp), en primer lugar se eligen aleatoriamente dos números primos grandes, p y q (de unas 200 cifras cada uno, por ejemplo). Después se calcula el producto n = p.q</p>
+            <p>Escogeremos ahora un número e primo relativo con (p-1) y con (q-1). Este par de números (e,n) pueden ser conocidos por cualquiera, y constituyen la llamada clave pública.</p>
+            <p>e por tanto debe tener un inverso módulo (p-1)(q-1), al que llamamos d. Por supuesto se cumple que ed ≡ 1 mod((p-1)(q-1)), que es lo mismo que decir que ed = 1+k (p-1)(q-1) para algún entero k. La clave privada será el par (d,n). Este número d debe mantenerse secreto y sólo será conocido por el propietario del par de claves.</p>
+            <li>Cifrado del mensaje con la clave pública</li>
+            <p>Hay que hacer notar que con este algoritmo los mensajes que se cifran y descifran son números enteros de tamaño menor que n.</p>
+            <p>Para obtener el mensaje cifrado C a partir del mensaje en claro M, se realiza la siguiente operación:<br>
+                C= M<sup>e</sup> (mod n)
+            </p>
+            <li>Descifrado del mensaje con la clave privada</li>
+            <p>Para recuperar el mensaje original a partir del cifrado se realiza la siguiente operación:<br>
+                M= C<sup>d</sup> (mod n)</p>
+        </ol>
+        <h2>Justificación del método</h2>
+        <p>C<sup>d</sup> (mod n)= (M<sup>e</sup>)<sup>d</sup> (mod n) = M<sup>1+k(p-1)(q-1)</sup>(mod n) = (M<sup>(p-1)(q-1)</sup>)k.M (mod n) [i]</p>
+        <p>Si recordamos, la función de Euler φ(n)= (p-1)(q-1), y que en general, salvo azar improbable, se tendrá que mcd(M,p)=mcd(M,q)=mcd(M,n)=1. Y por tanto según el teorema de Euler-Fermat, </p>
+        <p>M<sup>φ</sup>(n) ≡ 1 (mod n) ⇒ (M<sup>(p-1)(q-1)</sup>)k ≡ 1 (mod n) [ii]</p>
+        <p>De [i] y [ii] se obtiene que C<sup>d</sup> (mod n) = 1.M (mod n) = M, para 0 < M < n</p>
+        <h3>Conmutatividad del cifrado y descifrado en RSA</h3>
+        <p>Por las propiedades de la exponenciación modular, el cifrado y descifrado son conmutativos:</p>
+        <p>M = (M<sup>e</sup> mod n)d mod n = M<sup>d·e</sup> mod n = (M<sup>d</sup> mod n)<sup>e</sup> mod n = M</p>
+        <p>Esto supone que si cifrando M con la clave pública e y a continuación descifrando el resultado con la privada d obtenemos de nuevo M, también podemos cifrar M con la clave privada d y descifrar el resultado con la clave pública e, volviendo a obtener M.</p>
+        <p>Esta propiedad es importante porque nos permite utilizar RSA no sólo para cifrar un mensaje, sino también para autenticar el mensaje.</p>
         </script>
     </body>
 </html>

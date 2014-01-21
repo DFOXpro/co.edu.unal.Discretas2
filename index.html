@@ -35,15 +35,13 @@ and open the template in the editor.
         </header>
 
         <article>
-            <b>Escoje los primos que se usarán para el cifrado</b>
-            <input type="number" id="p" placeholder="P">
-            <input type="number" id="q" placeholder="Q">
+            <h1>Cargando</h1>
         </article>
 
         <footer>
             <div class="izquierda">
-                <input type="checkbox" id="cb">
-                <label for="cb">Automatico?</label>
+<!--                <input type="checkbox" id="cb">-->
+                <label for="delay">Delay </label>
                 <input id="delay" type="number" placeholder="3 segundos">
             </div>
             <button id="btn-cifrar" class="derecha glyphicon glyphicon-flash"><span>Cifrar</span></button>
@@ -52,7 +50,8 @@ and open the template in the editor.
         <aside>
             <ul>
                 <li id="li-principal" class="seleccionado"><a href="#"><span class="glyphicon glyphicon-certificate"></span> Cifrar</a></li>
-<!--                <li id="li-preferencias"><a href="#"><span class="glyphicon glyphicon-cog"></span> Preferencias</a></li>-->
+<!--                <li id="li-install"><a href="#"><span class="glyphicon glyphicon-saved"></span> Instalar</a></li>
+                <li id="li-preferencias"><a href="#"><span class="glyphicon glyphicon-cog"></span> Preferencias</a></li>-->
                 <li id="li-teoria"><a href="#"><span class="glyphicon glyphicon-book"></span> Teoria</a></li>
 <!--                <li id="li-acerca"><a href="#"><span class="glyphicon glyphicon-question-sign"></span> Acerca de esta app</a></li>-->
             </ul>
@@ -263,7 +262,7 @@ and open the template in the editor.
             Vista.llenarResultado = function (){
                 var t = Control.cifrado;
                 $("ol")[2].innerHTML +=
-                    $("#txt-7").html();
+                    $("#txt-8").html();
                 var j=1;
                 setInterval(function (){
                     if(j < Control.cifrado.length){
@@ -302,6 +301,7 @@ and open the template in the editor.
             <b>Escribe un texto para cifrar.</b>
         </script>
         <script type="text/template" id="txt-generar">
+			<p><b>Proceso de generación de llaves</b>
             <p>Teniendo los primos <math>p={0}, q={1}</math> se generaran las llaves de cifrado y decifrado.<br>
             Para esto tambien es necesario hallár un modulo.
                 <ol></ol>
@@ -314,6 +314,9 @@ and open the template in the editor.
             </div>
             <div id="div-code">
             </div>
+        </script><script type="text/template" id="install">
+			<h1>Cifrado Asincrono app installation page</h1>
+			<p>Please load this URL on a FxOS device or within Firefox browser to install it as an app.</p>
         </script><script type="text/template" id="txt-generar-1">
             <li>El modulo lo hallamos simplemente multiplicando los primos: <math>m=pq={0}</math></li>
         </script><script type="text/template" id="txt-generar-2">

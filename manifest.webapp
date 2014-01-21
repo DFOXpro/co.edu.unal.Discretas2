@@ -1,0 +1,18 @@
+{
+    "name": "Cifrado Asincrono",
+    "description": "Ejemplo academico de como funciona el cifrado en rsa",
+	"launch_path": "/index.html",
+	"installs_allowed_from": ["*"],
+	"icons": {
+		"256": "icono256.png",
+		"128": "icono128.png",
+		"64": "icono64.png",
+		"60": "icono60.png",
+		"32": "icono32.png"
+	},
+    "version": "0.0.1",
+    "developer": {
+        "name": "Daniel Zorro",
+        "url": "https://github.com/DFOXpro/co-edu-unal-Discretas2.github.io"
+    }
+}

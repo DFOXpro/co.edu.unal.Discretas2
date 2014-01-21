@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns="http://java.sun.com/xml/ns/javaee"
+xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+	<servlet>
+		<servlet-name>Discretas2</servlet-name>
+		<servlet-class>co.edu.unal.ingenieria.discretas2.proyectofinal2013.Discretas2Servlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Discretas2</servlet-name>
+		<url-pattern>/discretas2</url-pattern>
+	</servlet-mapping>
+	<mime_mapping>
+	    <extension>webapp</extension>
+	    <mime-type>application/x-web-app-manifest+json</mime-type>
+	</mime_mapping>
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+</web-app>
